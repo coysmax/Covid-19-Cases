@@ -1,217 +1,116 @@
-# US COVID-19 Cases and Rates Mapping
+# COVID-19 Cases Mapping Project
 
-## Project Name
-**COVID-19 Geospatial Analysis: Interactive Choropleth and Proportional Symbols Maps**
+## Project Description
 
-## Overview
-This project provides interactive web-based thematic maps visualizing the geographic distribution of COVID-19 cases and rates across the United States in 2020. It showcases two complementary visualization techniques to understand the spatial patterns of the pandemic:
+This project visualizes COVID-19 case data across US counties using interactive web-based choropleth and proportional symbols maps. The maps display both absolute case counts and infection rates per 100,000 population, allowing users to explore regional COVID-19 impact patterns during 2020.
 
-1. **Choropleth Map**: Displays absolute case counts by county using color intensity
-2. **Proportional Symbols Map**: Shows infection rates (cases per 100,000 population) using circle size
+## Live Maps
 
-## Map Links
-- **Choropleth Map (Cases)**: [View Map 1](https://coysmac.github.io/covid-19-mapping/map1.html)
-- **Proportional Symbols Map (Rates)**: [View Map 2](https://coysmac.github.io/covid-19-mapping/map2.html)
+- **Choropleth Map (Cases by County)**: [View Map 1](https://coysmax.github.io/Covid-19-Cases/map1.html)
+- **Proportional Symbols Map (Infection Rates)**: [View Map 2](https://coysmax.github.io/Covid-19-Cases/map2.html)
 
-## Key Features
+## Project Overview
 
-### Map 1 - Choropleth Map (Cases)
-- **Visualization Type**: Choropleth (color-coded regions)
-- **Data Represented**: Total COVID-19 cases by county
-- **Color Scheme**: Sequential from light yellow (#FFFFCC) to dark red (#800026)
-- **Interactive Features**:
-  - Click on any county to view detailed information
-  - Hover effect to highlight counties
-  - Navigation controls (zoom, pan)
-  - Dynamic legend showing case ranges
+### Map 1: Choropleth Visualization
+- Displays total COVID-19 cases per county using color interpolation
+- 8-class color scheme from light yellow (#FFFFCC) to dark red (#800026)
+- Interactive popups showing county name, cases, deaths, and FIPS code
+- Hover effects for improved user experience
 
-### Map 2 - Proportional Symbols Map (Rates)
-- **Visualization Type**: Proportional symbols (circle size)
-- **Data Represented**: COVID-19 infection rates (cases per 100,000 population)
-- **Symbol Style**: Red circles with varying radii
-- **Interactive Features**:
-  - Click on any county circle to view detailed statistics
-  - Background county boundaries for context
-  - Proportional sizing based on infection rate
-  - Interactive legend with symbol sizes
+### Map 2: Proportional Symbols Visualization
+- Uses circle sizes to represent case counts at county centroids
+- Includes background county polygon layer for geographic context
+- Interactive popups with total cases, deaths, and population data
+- Circle radius interpolation based on case counts (2-28 pixels)
 
-## Project Structure
-```
-covid-19-mapping/
-│
-├── map1.html                          # Choropleth map
-├── map2.html                          # Proportional symbols map
-├── README.md                          # This file
-│
-├── assets/
-│   ├── us-covid-2020-counts.geojson  # County data with case counts
-│   └── us-covid-2020-rates.geojson   # County data with infection rates
-│
-├── css/
-│   └── style.css                      # Shared styling
-│
-├── js/
-│   └── main.js                        # Shared JavaScript utilities
-│
-└── img/
-    └── (screenshots and images)
-```
+## Primary Functions
 
-## Technologies & Libraries Used
+### Custom Utility Functions (Not Covered in Lectures)
 
-### Mapping Library
-- **Mapbox GL JS v2.8.1**: Interactive web maps with WebGL rendering
-  - Provides modern mapping capabilities
-  - Supports custom projections (Albers Conformal)
-  - Excellent performance for large datasets
+1. **getChoroplethColor(value)** - Generates color codes based on case thresholds using ternary operators for efficient color mapping
+2. **getProportionalRadius(rate)** - Calculates proportional circle radius using conditional logic for visual encoding
+3. **formatNumber(num)** - Formats large numbers with thousand separators for readability
+4. **formatDecimal(num)** - Rounds decimal values to 1 decimal place
+5. **createChoroplehtPopup(properties)** - Generates dynamic HTML popups from GeoJSON feature properties
+6. **createProportionalPopup(properties)** - Creates formatted popup content with multiple data fields
+7. **createChoroplehtLegend(container)** - Dynamically generates legend items with color swatches
+8. **createProportionalLegend(container)** - Creates legend with proportional circle symbols
+9. **addLayerPopup(map, layerId, popupGenerator)** - Reusable function to attach popups to any map layer
+10. **addLayerHoverEffect(map, layerId)** - Adds cursor change on hover for layer interactivity
+11. **initializeMap(config)** - Factory function to initialize maps with standard configuration
 
-### Data Processing
-- **Python**: Shapefile conversion
-  - `shapefile` library for reading GIS data
-  - `json` library for GeoJSON export
+### Advanced Features
 
-### Frontend
-- **HTML5**: Semantic markup
-- **CSS3**: Styling and layout
-- **JavaScript (ES6+)**: Interactivity and map logic
-- **D3.js v7.6.1**: Data visualization utilities (available for enhanced functionality)
+- **Dynamic Legend Generation** - Legends are created programmatically from data arrays rather than hardcoded
+- **Layer Stacking** - Background polygon layers provide geographic context for point data
+- **Albers Projection** - US-appropriate conformal conic projection for accurate area representation
+- **GeoJSON Data Conversion** - Python script to convert ESRI shapefiles to GeoJSON with proper geometry type handling
 
-### Other Tools
-- **Mapshaper**: GeoJSON geometry simplification
-- **GitHub Pages**: Static site hosting
+## Technologies & Libraries
+
+- **Mapbox GL JS v2.8.1** - WebGL-based mapping library with vector tile support
+- **HTML5 / CSS3 / ES6+ JavaScript** - Frontend technologies for interactive web application
+- **D3.js v7.6.1** - Data visualization library for utility functions and calculations
+- **GeoJSON Format** - Standard format for geographic feature data
+- **Python 3** - Backend conversion tool using shapefile library
 
 ## Data Sources
 
-### Primary Data
-- **US COVID-19 Dataset**: County-level COVID-19 case counts and death counts
-- **Source Format**: Shapefiles (ESRI standard GIS format)
-- **Temporal Coverage**: 2020
-- **Geographic Coverage**: All US counties (3,103 features)
+- **US COVID-19 Dataset** - County-level COVID-19 case counts and death data (2020)
+- **ESRI Shapefiles** - US county boundary geometries and centroids
+- **Census Data** - 2018 population estimates for rate calculations
 
-### Data Attributes
-**Counts Dataset**:
-- `county`: County name
-- `state`: State abbreviation
-- `fips`: Federal Information Processing Standards code
-- `cases`: Total COVID-19 cases
-- `deaths`: Total COVID-19 deaths
+## Data Processing
 
-**Rates Dataset**:
-- `county`: County name
-- `state`: State abbreviation
-- `fips`: Federal Information Processing Standards code
-- `cases`: Total COVID-19 cases
-- `deaths`: Total COVID-19 deaths
-- `pop18`: 2018 population estimate
-- `rates`: Cases per 100,000 population
+- **Two GeoJSON Files**:
+  - `us-covid-2020-counts.geojson` - Point geometries (county centroids) with case counts
+  - `us-covid-2020-rates.geojson` - Polygon geometries (county boundaries) with all statistics
 
-## Technical Implementation Details
-
-### Projection
-- **Albers Conformal Conic Projection**: Appropriate for displaying continental US data
-  - Minimizes distortion for the US mainland
-  - Provides better visual representation than Web Mercator for thematic mapping
-  - Implementation: `projection: 'albers'` in Mapbox configuration
-
-### Data Processing Workflow
-1. **Conversion**: Shapefiles → GeoJSON format using Python
-2. **Simplification**: Geometry simplification using Mapshaper to reduce file size
-3. **Optimization**: Removed unnecessary attributes to streamline data
-4. **Organization**: Centralized GeoJSON files in `/assets` directory
-
-### Interactive Elements
-
-#### Choropleth Map Interactivity
-- **Click Events**: Displays popup with:
-  - County and state name
-  - Total cases and deaths
-  - FIPS code
-  - Visual confirmation of selection
-  
-#### Proportional Symbols Map Interactivity
-- **Click Events**: Shows detailed statistics including:
-  - County and state
-  - Infection rate (cases per 100k)
-  - Total cases and deaths
-  - Population data
-  - FIPS code
-
-### Styling & Basemap
-- **Basemap Style**: Mapbox Light v10
-  - Clean, minimal design
-  - Clear county boundaries
-  - Good contrast for thematic overlays
-  - Professional appearance
-
-## Primary Function Highlighting
-### Albers Projection Implementation
-This project utilizes **Mapbox GL's native Albers Conformal Conic projection** support, which was not covered in standard lectures. This projection is particularly valuable for US thematic mapping because:
-- Reduces distortion compared to Web Mercator
-- Provides more accurate area representation
-- Creates a more appropriate visual hierarchy for regional data
-- Improves the visual interpretation of geographic patterns
-
-Implementation in Mapbox GL is straightforward:
-```javascript
-let map = new mapboxgl.Map({
-    container: 'map',
-    projection: 'albers'  // Set Albers projection
-});
-```
-
-## Supplementary Information
-
-### Map Metadata
-- **Created**: January 2026
-- **Creator**: Data Visualization Project
-- **Course**: Geographic Information Systems & Cartography
-- **Institution**: University Course on Web Mapping
-
-### Data Accuracy Notes
-- Data represents 2020 COVID-19 statistics
-- Population estimates based on 2018 census data
-- County boundaries may have changed since data collection
-- Some counties may have incomplete data reporting
+- **Properties Included**: County name, state, FIPS code, cases, deaths, population (2018), infection rates
 
 ## Credits & Acknowledgments
-- **Mapbox**: For providing the mapping platform and basemap tiles
-- **COVID-19 Data Source**: CDC and public health agencies
-- **Mapshaper**: For geometry simplification tools
-- **D3.js**: For data visualization capabilities
-- **GitHub**: For hosting and GitHub Pages support
 
-## How to Use
+- **Mapbox** - For the GL JS library and map styling
+- **US COVID-19 Dataset** - For comprehensive case and death data
+- **ESRI** - For county boundary shapefiles
+- **D3.js Community** - For data visualization utilities
 
-### Local Development
-1. Clone the repository to your local machine
-2. Install a local web server (Python SimpleHTTPServer, Node Live Server, etc.)
-3. Navigate to the repository directory
-4. Start the server and access `http://localhost:PORT/map1.html` or `map2.html`
+## Project Structure
 
-### Viewing Online
-Access the maps directly via GitHub Pages:
-- Map 1: `https://[your_github_username].github.io/[your_repository_name]/map1.html`
-- Map 2: `https://[your_github_username].github.io/[your_repository_name]/map2.html`
+```
+Covid-19-Cases/
+├── map1.html                           # Choropleth map
+├── map2.html                           # Proportional symbols map
+├── README.md                           # Project documentation
+├── css/
+│   └── style.css                       # Shared styling
+├── js/
+│   └── main.js                         # Utility functions
+├── assets/
+│   ├── us-covid-2020-counts.geojson   # Point data
+│   └── us-covid-2020-rates.geojson    # Polygon data
+└── img/                                # Project images
+```
 
-## Browser Compatibility
-- Chrome/Chromium: Full support
-- Firefox: Full support
-- Safari: Full support
-- Edge: Full support
-- Internet Explorer: Not supported (uses WebGL)
+## Key Implementation Details
 
-## Performance Considerations
-- **GeoJSON File Size**: ~2-3 MB per file (after simplification)
-- **Loading Time**: Typically 2-5 seconds on standard connections
-- **Interactivity**: Real-time response to user interactions
-- **Zoom Levels**: Optimized for zoom levels 2-14
+1. **Geometry Type Handling** - Proper detection and conversion of Point (type 1) vs Polygon (types 5/15/25) geometries
+2. **Interpolate Expression** - Mapbox Paint property using linear interpolation for smooth color/size transitions
+3. **Click & Hover Events** - Event listeners for interactive popups and cursor feedback
+4. **Dynamic DOM Creation** - JavaScript to programmatically build legend items and popup content
+5. **GitHub Pages Hosting** - Static site deployment for free public access
 
-## License
-This project is provided for educational purposes.
+## Usage
 
-## Feedback & Support
-For issues, questions, or suggestions regarding this project, please contact the course instructor or teaching assistant.
+1. Open either map link in a web browser
+2. Click on counties to view detailed information
+3. Hover over features to see cursor feedback
+4. Zoom and pan to explore different regions
+5. Refer to legend for value interpretation
 
----
+## Notes
 
-**Last Updated**: January 28, 2026
+- Maps display 2020 COVID-19 data only
+- Population figures based on 2018 Census estimates
+- Infection rates calculated as cases per 100,000 population
+- All data is for educational and informational purposes
