@@ -1,20 +1,5 @@
-/**
- * COVID-19 Mapping Project - Shared Utilities
- * Main JavaScript file for map functionality
- */
-
-// Mapbox Configuration
 mapboxgl.accessToken = 'pk.eyJ1IjoiY295c21heCIsImEiOiJjbWhjeGVxbWQxZjV3MmpwcjlsNGNoc2pkIn0.lN8fMUCO0-cVKDiQW_G7tg';
 
-/**
- * Utility Functions for COVID-19 Maps
- */
-
-/**
- * Get color for choropleth map based on case count
- * @param {number} value - Case count
- * @returns {string} Hex color code
- */
 function getChoroplethColor(value) {
     return value > 50000 ? '#800026' :
            value > 20000 ? '#BD0026' :
@@ -26,11 +11,6 @@ function getChoroplethColor(value) {
                           '#FFFFCC';
 }
 
-/**
- * Get circle radius for proportional symbols based on rate
- * @param {number} rate - Cases per 100,000 population
- * @returns {number} Circle radius in pixels
- */
 function getProportionalRadius(rate) {
     if (rate === 0) return 3;
     if (rate <= 500) return 5;
@@ -47,21 +27,11 @@ function getProportionalRadius(rate) {
  * @param {number} num - Number to format
  * @returns {string} Formatted number
  */
-function formatNumber(num) {
-    if (num === null || num === undefined) return 'N/A';
-    return num.toLocaleString('en-US');
-}
-
 /**
  * Format decimal numbers to 1 decimal place
  * @param {number} num - Number to format
  * @returns {string} Formatted number
  */
-function formatDecimal(num) {
-    if (num === null || num === undefined) return 'N/A';
-    return num.toFixed(1);
-}
-
 /**
  * Create popup HTML for choropleth map
  * @param {object} properties - Feature properties
@@ -72,11 +42,6 @@ function createChoroplehtPopup(properties) {
         <div class="popup-content">
             <p><strong>${properties.county}, ${properties.state}</strong></p>
             <p><strong>Cases:</strong> ${formatNumber(properties.cases)}</p>
-            <p><strong>Deaths:</strong> ${formatNumber(properties.deaths)}</p>
-            <p><strong>FIPS Code:</strong> ${properties.fips}</p>
-        </div>
-    `;
-}
 
 /**
  * Create popup HTML for proportional symbols map
@@ -88,11 +53,6 @@ function createProportionalPopup(properties) {
         <div class="popup-content">
             <p><strong>${properties.county}, ${properties.state}</strong></p>
             <p><strong>Cases per 100k:</strong> ${formatDecimal(properties.rates)}</p>
-            <p><strong>Total Cases:</strong> ${formatNumber(properties.cases)}</p>
-            <p><strong>Deaths:</strong> ${formatNumber(properties.deaths)}</p>
-            <p><strong>Population (2018):</strong> ${formatNumber(properties.pop18)}</p>
-            <p><strong>FIPS Code:</strong> ${properties.fips}</p>
-        </div>
     `;
 }
 
@@ -111,10 +71,6 @@ function createChoroplehtLegend(container) {
         const color = document.createElement('div');
         color.className = 'legend-color';
         color.style.backgroundColor = colors[i];
-        
-        const label = document.createElement('span');
-        if (i < breaks.length - 1) {
-            label.textContent = `${formatNumber(breaks[i])} - ${formatNumber(breaks[i + 1])}`;
         } else {
             label.textContent = `${formatNumber(breaks[i])}+`;
         }
@@ -139,10 +95,6 @@ function createProportionalLegend(container) {
         const circle = document.createElement('div');
         circle.className = 'legend-circle';
         
-        const radius = getProportionalRadius(rates[i]);
-        circle.style.width = (radius * 2) + 'px';
-        circle.style.height = (radius * 2) + 'px';
-        
         const label = document.createElement('span');
         if (i < rates.length - 1) {
             label.textContent = `${rates[i]} - ${rates[i + 1]}`;
@@ -156,12 +108,6 @@ function createProportionalLegend(container) {
     }
 }
 
-/**
- * Add interactive popup to map layer
- * @param {mapboxgl.Map} map - Mapbox map instance
- * @param {string} layerId - Layer ID to attach popup to
- * @param {function} popupGenerator - Function to generate popup HTML
- */
 function addLayerPopup(map, layerId, popupGenerator) {
     map.on('click', layerId, function(e) {
         const properties = e.features[0].properties;
@@ -174,11 +120,6 @@ function addLayerPopup(map, layerId, popupGenerator) {
     });
 }
 
-/**
- * Add hover effects to map layer
- * @param {mapboxgl.Map} map - Mapbox map instance
- * @param {string} layerId - Layer ID to add hover effects
- */
 function addLayerHoverEffect(map, layerId) {
     map.on('mouseenter', layerId, () => {
         map.getCanvas().style.cursor = 'pointer';
@@ -188,11 +129,6 @@ function addLayerHoverEffect(map, layerId) {
     });
 }
 
-/**
- * Initialize map with standard settings
- * @param {object} config - Configuration object
- * @returns {mapboxgl.Map} Mapbox map instance
- */
 function initializeMap(config = {}) {
     const defaultConfig = {
         container: 'map',
@@ -219,9 +155,6 @@ function initializeMap(config = {}) {
  */
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-        getChoroplethColor,
-        getProportionalRadius,
-        formatNumber,
         formatDecimal,
         createChoroplehtPopup,
         createProportionalPopup,
