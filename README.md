@@ -31,12 +31,7 @@ This project visualizes COVID-19 case data across US counties using interactive 
 3. **formatNumber(num)** - Formats large numbers with thousand separators for readability
 4. **formatDecimal(num)** - Rounds decimal values to 1 decimal place
 5. **createChoroplehtPopup(properties)** - Generates dynamic HTML popups from GeoJSON feature properties
-6. **createProportionalPopup(properties)** - Creates formatted popup content with multiple data fields
-7. **createChoroplehtLegend(container)** - Dynamically generates legend items with color swatches
-8. **createProportionalLegend(container)** - Creates legend with proportional circle symbols
-9. **addLayerPopup(map, layerId, popupGenerator)** - Reusable function to attach popups to any map layer
-10. **addLayerHoverEffect(map, layerId)** - Adds cursor change on hover for layer interactivity
-11. **initializeMap(config)** - Factory function to initialize maps with standard configuration
+
 
 
 ## Technologies & Libraries
