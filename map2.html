@@ -118,8 +118,10 @@
     </div>
 
     <script>
+        // Mapbox Access Token
         mapboxgl.accessToken = 'pk.eyJ1IjoiY295c21heCIsImEiOiJjbWhjeGVxbWQxZjV3MmpwcjlsNGNoc2pkIn0.lN8fMUCO0-cVKDiQW_G7tg';
         
+        // Initialize map with Albers projection
         let map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/light-v10',
@@ -132,24 +134,29 @@
             projection: 'albers'
         });
 
+        // Add navigation controls
         map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
+        // Load data and create proportional symbols
         map.on('load', () => {
             console.log('Map loaded, loading GeoJSON data...');
             
             // Add the geojson data source - counts file has points at county centroids
             map.addSource('covid-rates', {
+                type: 'geojson',
                 data: 'assets/us-covid-2020-counts.geojson',
                 generateId: true
             });
 
             // Add background county polygons from rates file
+            map.addSource('county-polygons', {
                 type: 'geojson',
                 data: 'assets/us-covid-2020-rates.geojson',
                 generateId: true
             });
 
             // Add background counties layer (light fill)
+            map.addLayer({
                 id: 'background-counties',
                 type: 'fill',
                 source: 'county-polygons',
@@ -161,6 +168,7 @@
 
             // Add county outlines
             map.addLayer({
+                id: 'county-outlines',
                 type: 'line',
                 source: 'county-polygons',
                 paint: {
@@ -173,6 +181,7 @@
             // Create proportional symbols using point geometries from counts file
             map.addLayer({
                 id: 'proportional-symbols',
+                type: 'circle',
                 source: 'covid-rates',
                 paint: {
                     'circle-radius': [
@@ -200,6 +209,7 @@
 
             // Create legend
             const legendContent = document.getElementById('legend-content');
+            const rates = [0, 100, 500, 1000, 2000, 3000, 5000, 10000, 50000];
             
             for (let i = 0; i < rates.length; i++) {
                 const item = document.createElement('div');
@@ -212,6 +222,7 @@
                 let radius;
                 const cases = rates[i];
                 if (cases === 0) radius = 3;
+                else if (cases === 100) radius = 5;
                 else if (cases === 500) radius = 7;
                 else if (cases === 1000) radius = 9;
                 else if (cases === 2000) radius = 12;
@@ -239,6 +250,7 @@
             map.on('click', 'proportional-symbols', function(e) {
                 const properties = e.features[0].properties;
                 
+                const popupHTML = `
                     <div class="popup-content">
                         <p><strong>${properties.county}, ${properties.state}</strong></p>
                         <p>Total Cases: ${properties.cases ? properties.cases.toLocaleString() : 'N/A'}</p>
@@ -258,6 +270,7 @@
                 map.getCanvas().style.cursor = 'pointer';
             });
             map.on('mouseleave', 'proportional-symbols', () => {
+                map.getCanvas().style.cursor = '';
             });
         });
 
@@ -267,6 +280,7 @@
         });
     </script>
 
+</body>
 
 </html>
                 'source': 'earthquakes'
