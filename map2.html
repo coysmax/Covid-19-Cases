@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>US COVID-19 Rates: Proportional Symbols Map</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js"></script>
+    <link href="css/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.6.1/dist/d3.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.8);
+            margin-left: 20px;
+            font-size: 12px;
+            padding: 10px;
+            max-width: 250px;
+            line-height: 1.3;
+            z-index: 1;
+        }
+
+        .legend {
+            background: rgba(255, 255, 255, 0.9);
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            max-width: 280px;
+        }
+
+        .legend h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .legend-circle {
+            margin-right: 10px;
+            border: 2px solid #d32f2f;
+            background-color: rgba(211, 47, 47, 0.5);
+            border-radius: 50%;
+        }
+
+        .title-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        .title-container h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .title-container p {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .popup-content {
+            font-size: 12px;
+        }
+
+        .popup-content p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    
+    <div class="title-container">
+        <h1>US COVID-19 Rates by County (2020)</h1>
+        <p><strong>Proportional Symbols Map</strong></p>
+        <p>This map visualizes the COVID-19 infection rate (cases per 100,000 population) using proportional circle symbols.</p>
+        <p><strong>Data Source:</strong> US COVID-19 Dataset</p>
+        <p><strong>Created:</strong> January 2026</p>
+    </div>
+
+    <div class="legend" id="legend">
+        <h3>Cases per 100k Population</h3>
+        <div id="legend-content"></div>
+    </div>
+
+    <script>
+        // Mapbox Access Token
+        mapboxgl.accessToken = 'pk.eyJ1IjoiY295c21heCIsImEiOiJjbWhjeGVxbWQxZjV3MmpwcjlsNGNoc2pkIn0.lN8fMUCO0-cVKDiQW_G7tg';
+        
+        // Initialize map with Albers projection
+        let map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v10',
+            zoom: 3.5,
+            minZoom: 2,
+            maxZoom: 14,
+            center: [-95, 38],
+            pitch: 0,
+            bearing: 0,
+            projection: 'albers'
+        });
+
+        // Add navigation controls
+        map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+        // Load data and create proportional symbols
+        map.on('load', () => {
+            // Add the geojson data source
+            map.addSource('covid-rates', {
+                type: 'geojson',
+                data: 'assets/us-covid-2020-rates.geojson'
+            });
+
+            // Add background counties layer (light fill)
+            map.addLayer({
+                id: 'background-counties',
+                type: 'fill',
+                source: 'covid-rates',
+                paint: {
+                    'fill-color': '#f0f0f0',
+                    'fill-opacity': 0.5
+                }
+            });
+
+            // Add county outlines
+            map.addLayer({
+                id: 'county-outlines',
+                type: 'line',
+                source: 'covid-rates',
+                paint: {
+                    'line-color': '#ccc',
+                    'line-width': 0.5,
+                    'line-opacity': 0.5
+                }
+            });
+
+            // Calculate centroids and create proportional symbols using image-based circles
+            // We'll use fill circles sized by rate
+            map.addLayer({
+                id: 'proportional-symbols',
+                type: 'circle',
+                source: 'covid-rates',
+                paint: {
+                    'circle-radius': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'rates'],
+                        0, 1,
+                        500, 3,
+                        1000, 5,
+                        2000, 8,
+                        3000, 12,
+                        5000, 16,
+                        10000, 20,
+                        15000, 25
+                    ],
+                    'circle-color': '#d32f2f',
+                    'circle-opacity': 0.6,
+                    'circle-stroke-width': 1.5,
+                    'circle-stroke-color': '#b71c1c'
+                }
+            });
+
+            // Create legend
+            const legendContent = document.getElementById('legend-content');
+            const rates = [0, 500, 1000, 2000, 3000, 5000, 10000, 15000];
+            
+            for (let i = 0; i < rates.length; i++) {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                
+                const circle = document.createElement('div');
+                circle.className = 'legend-circle';
+                
+                // Calculate radius based on rate
+                const radius = rates[i] === 0 ? 3 : 
+                              rates[i] === 500 ? 5 :
+                              rates[i] === 1000 ? 7 :
+                              rates[i] === 2000 ? 10 :
+                              rates[i] === 3000 ? 12 :
+                              rates[i] === 5000 ? 15 :
+                              rates[i] === 10000 ? 18 :
+                              20;
+                
+                circle.style.width = (radius * 2) + 'px';
+                circle.style.height = (radius * 2) + 'px';
+                
+                const label = document.createElement('span');
+                if (i < rates.length - 1) {
+                    label.textContent = `${rates[i]} - ${rates[i + 1]}`;
+                } else {
+                    label.textContent = `${rates[i]}+`;
+                }
+                
+                item.appendChild(circle);
+                item.appendChild(label);
+                legendContent.appendChild(item);
+            }
+
+            // Add interactive popup on click
+            map.on('click', 'proportional-symbols', function(e) {
+                const properties = e.features[0].properties;
+                
+                const popupHTML = `
+                    <div class="popup-content">
+                        <p><strong>${properties.county}, ${properties.state}</strong></p>
+                        <p>Cases per 100k: ${properties.rates ? properties.rates.toFixed(1) : 'N/A'}</p>
+                        <p>Total Cases: ${properties.cases ? properties.cases.toLocaleString() : 'N/A'}</p>
+                        <p>Deaths: ${properties.deaths ? properties.deaths.toLocaleString() : 'N/A'}</p>
+                        <p>Population 2018: ${properties.pop18 ? properties.pop18.toLocaleString() : 'N/A'}</p>
+                        <p>FIPS: ${properties.fips}</p>
+                    </div>
+                `;
+
+                new mapboxgl.Popup()
+                    .setLngLat(e.lngLat)
+                    .setHTML(popupHTML)
+                    .addTo(map);
+            });
+
+            // Change cursor on hover
+            map.on('mouseenter', 'proportional-symbols', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'proportional-symbols', () => {
+                map.getCanvas().style.cursor = '';
+            });
+        });
+    </script>
+
+</body>
+
+</html>
+                'type': 'circle',
+                'source': 'earthquakes'
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>
