@@ -139,10 +139,13 @@
 
         // Load data and create proportional symbols
         map.on('load', () => {
+            console.log('Map loaded, loading GeoJSON data...');
+            
             // Add the geojson data source
             map.addSource('covid-rates', {
                 type: 'geojson',
-                data: 'assets/us-covid-2020-rates.geojson'
+                data: 'assets/us-covid-2020-rates.geojson',
+                generateId: true
             });
 
             // Add background counties layer (light fill)
@@ -152,7 +155,7 @@
                 source: 'covid-rates',
                 paint: {
                     'fill-color': '#f0f0f0',
-                    'fill-opacity': 0.5
+                    'fill-opacity': 0.4
                 }
             });
 
@@ -163,8 +166,8 @@
                 source: 'covid-rates',
                 paint: {
                     'line-color': '#ccc',
-                    'line-width': 0.5,
-                    'line-opacity': 0.5
+                    'line-width': 0.75,
+                    'line-opacity': 0.6
                 }
             });
 
@@ -179,25 +182,28 @@
                         'interpolate',
                         ['linear'],
                         ['get', 'rates'],
-                        0, 1,
-                        500, 3,
-                        1000, 5,
-                        2000, 8,
-                        3000, 12,
-                        5000, 16,
-                        10000, 20,
-                        15000, 25
+                        0, 2,
+                        250, 4,
+                        500, 6,
+                        1000, 8,
+                        2000, 12,
+                        3000, 15,
+                        5000, 18,
+                        10000, 22,
+                        15000, 28
                     ],
                     'circle-color': '#d32f2f',
-                    'circle-opacity': 0.6,
-                    'circle-stroke-width': 1.5,
+                    'circle-opacity': 0.65,
+                    'circle-stroke-width': 2,
                     'circle-stroke-color': '#b71c1c'
                 }
             });
 
+            console.log('Layers added successfully');
+
             // Create legend
             const legendContent = document.getElementById('legend-content');
-            const rates = [0, 500, 1000, 2000, 3000, 5000, 10000, 15000];
+            const rates = [0, 250, 500, 1000, 2000, 3000, 5000, 10000, 15000];
             
             for (let i = 0; i < rates.length; i++) {
                 const item = document.createElement('div');
@@ -206,15 +212,18 @@
                 const circle = document.createElement('div');
                 circle.className = 'legend-circle';
                 
-                // Calculate radius based on rate
-                const radius = rates[i] === 0 ? 3 : 
-                              rates[i] === 500 ? 5 :
-                              rates[i] === 1000 ? 7 :
-                              rates[i] === 2000 ? 10 :
-                              rates[i] === 3000 ? 12 :
-                              rates[i] === 5000 ? 15 :
-                              rates[i] === 10000 ? 18 :
-                              20;
+                // Calculate radius based on rate using the same interpolation
+                let radius;
+                const rate = rates[i];
+                if (rate === 0) radius = 3;
+                else if (rate === 250) radius = 5;
+                else if (rate === 500) radius = 7;
+                else if (rate === 1000) radius = 9;
+                else if (rate === 2000) radius = 12;
+                else if (rate === 3000) radius = 15;
+                else if (rate === 5000) radius = 18;
+                else if (rate === 10000) radius = 22;
+                else radius = 28;
                 
                 circle.style.width = (radius * 2) + 'px';
                 circle.style.height = (radius * 2) + 'px';
@@ -241,7 +250,7 @@
                         <p>Cases per 100k: ${properties.rates ? properties.rates.toFixed(1) : 'N/A'}</p>
                         <p>Total Cases: ${properties.cases ? properties.cases.toLocaleString() : 'N/A'}</p>
                         <p>Deaths: ${properties.deaths ? properties.deaths.toLocaleString() : 'N/A'}</p>
-                        <p>Population 2018: ${properties.pop18 ? properties.pop18.toLocaleString() : 'N/A'}</p>
+                        <p>Population (2018): ${properties.pop18 ? properties.pop18.toLocaleString() : 'N/A'}</p>
                         <p>FIPS: ${properties.fips}</p>
                     </div>
                 `;
@@ -260,12 +269,16 @@
                 map.getCanvas().style.cursor = '';
             });
         });
+
+        // Error handling
+        map.on('error', (e) => {
+            console.error('Map error:', e);
+        });
     </script>
 
 </body>
 
 </html>
-                'type': 'circle',
                 'source': 'earthquakes'
             });
 

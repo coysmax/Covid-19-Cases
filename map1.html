@@ -160,10 +160,13 @@
 
         // Load data and add to map
         map.on('load', () => {
+            console.log('Map loaded, loading GeoJSON data...');
+            
             // Add the geojson data source
             map.addSource('covid-counts', {
                 type: 'geojson',
-                data: 'assets/us-covid-2020-counts.geojson'
+                data: 'assets/us-covid-2020-counts.geojson',
+                generateId: true
             });
 
             // Add the choropleth layer
@@ -185,7 +188,7 @@
                         20000, '#BD0026',
                         50000, '#800026'
                     ],
-                    'fill-opacity': 0.8
+                    'fill-opacity': 0.85
                 }
             });
 
@@ -196,10 +199,12 @@
                 source: 'covid-counts',
                 paint: {
                     'line-color': '#888',
-                    'line-width': 0.5,
-                    'line-opacity': 0.5
+                    'line-width': 0.75,
+                    'line-opacity': 0.6
                 }
             });
+
+            console.log('Layers added successfully');
 
             // Create legend
             const legendContent = document.getElementById('legend-content');
@@ -252,6 +257,11 @@
             map.on('mouseleave', 'covid-counts-layer', () => {
                 map.getCanvas().style.cursor = '';
             });
+        });
+
+        // Error handling
+        map.on('error', (e) => {
+            console.error('Map error:', e);
         });
     </script>
 
