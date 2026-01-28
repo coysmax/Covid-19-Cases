@@ -141,8 +141,15 @@
         map.on('load', () => {
             console.log('Map loaded, loading GeoJSON data...');
             
-            // Add the geojson data source
+            // Add the geojson data source - counts file has points at county centroids
             map.addSource('covid-rates', {
+                type: 'geojson',
+                data: 'assets/us-covid-2020-counts.geojson',
+                generateId: true
+            });
+
+            // Add background county polygons from rates file
+            map.addSource('county-polygons', {
                 type: 'geojson',
                 data: 'assets/us-covid-2020-rates.geojson',
                 generateId: true
@@ -152,7 +159,7 @@
             map.addLayer({
                 id: 'background-counties',
                 type: 'fill',
-                source: 'covid-rates',
+                source: 'county-polygons',
                 paint: {
                     'fill-color': '#f0f0f0',
                     'fill-opacity': 0.4
@@ -163,7 +170,7 @@
             map.addLayer({
                 id: 'county-outlines',
                 type: 'line',
-                source: 'covid-rates',
+                source: 'county-polygons',
                 paint: {
                     'line-color': '#ccc',
                     'line-width': 0.75,
@@ -171,8 +178,7 @@
                 }
             });
 
-            // Calculate centroids and create proportional symbols using image-based circles
-            // We'll use fill circles sized by rate
+            // Create proportional symbols using point geometries from counts file
             map.addLayer({
                 id: 'proportional-symbols',
                 type: 'circle',
@@ -181,16 +187,16 @@
                     'circle-radius': [
                         'interpolate',
                         ['linear'],
-                        ['get', 'rates'],
+                        ['get', 'cases'],
                         0, 2,
-                        250, 4,
+                        100, 4,
                         500, 6,
                         1000, 8,
                         2000, 12,
                         3000, 15,
                         5000, 18,
                         10000, 22,
-                        15000, 28
+                        50000, 28
                     ],
                     'circle-color': '#d32f2f',
                     'circle-opacity': 0.65,
@@ -203,7 +209,7 @@
 
             // Create legend
             const legendContent = document.getElementById('legend-content');
-            const rates = [0, 250, 500, 1000, 2000, 3000, 5000, 10000, 15000];
+            const rates = [0, 100, 500, 1000, 2000, 3000, 5000, 10000, 50000];
             
             for (let i = 0; i < rates.length; i++) {
                 const item = document.createElement('div');
@@ -212,17 +218,17 @@
                 const circle = document.createElement('div');
                 circle.className = 'legend-circle';
                 
-                // Calculate radius based on rate using the same interpolation
+                // Calculate radius based on cases using the same interpolation
                 let radius;
-                const rate = rates[i];
-                if (rate === 0) radius = 3;
-                else if (rate === 250) radius = 5;
-                else if (rate === 500) radius = 7;
-                else if (rate === 1000) radius = 9;
-                else if (rate === 2000) radius = 12;
-                else if (rate === 3000) radius = 15;
-                else if (rate === 5000) radius = 18;
-                else if (rate === 10000) radius = 22;
+                const cases = rates[i];
+                if (cases === 0) radius = 3;
+                else if (cases === 100) radius = 5;
+                else if (cases === 500) radius = 7;
+                else if (cases === 1000) radius = 9;
+                else if (cases === 2000) radius = 12;
+                else if (cases === 3000) radius = 15;
+                else if (cases === 5000) radius = 18;
+                else if (cases === 10000) radius = 22;
                 else radius = 28;
                 
                 circle.style.width = (radius * 2) + 'px';
@@ -230,9 +236,9 @@
                 
                 const label = document.createElement('span');
                 if (i < rates.length - 1) {
-                    label.textContent = `${rates[i]} - ${rates[i + 1]}`;
+                    label.textContent = `${rates[i].toLocaleString()} - ${rates[i + 1].toLocaleString()}`;
                 } else {
-                    label.textContent = `${rates[i]}+`;
+                    label.textContent = `${rates[i].toLocaleString()}+`;
                 }
                 
                 item.appendChild(circle);
@@ -247,10 +253,8 @@
                 const popupHTML = `
                     <div class="popup-content">
                         <p><strong>${properties.county}, ${properties.state}</strong></p>
-                        <p>Cases per 100k: ${properties.rates ? properties.rates.toFixed(1) : 'N/A'}</p>
                         <p>Total Cases: ${properties.cases ? properties.cases.toLocaleString() : 'N/A'}</p>
                         <p>Deaths: ${properties.deaths ? properties.deaths.toLocaleString() : 'N/A'}</p>
-                        <p>Population (2018): ${properties.pop18 ? properties.pop18.toLocaleString() : 'N/A'}</p>
                         <p>FIPS: ${properties.fips}</p>
                     </div>
                 `;
